@@ -52,7 +52,7 @@ void loop() {
   display.setCursor(0,0);
   display.println("Jardim5.0");
   display.println("Starting...");
-  delay(1000);
+    delay(1000);
   display.display();
   display.clearDisplay();
 
@@ -62,8 +62,8 @@ void loop() {
   display.println("Jardim5.0");
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  display.println("Testando 123 4lkdjfkldjsfklsjdflkdsjfkljdklfjdslkjflkdsjfklsdjflksdjfdklldsjflksdjfkldsjlfk");
-  delay(1000);
+  display.println("Bem vindo ao projeto jardim5.0, aqui vc conecta a natureza com a tecnologia");
+     delay(2000);
   display.display();
   display.clearDisplay();
 
