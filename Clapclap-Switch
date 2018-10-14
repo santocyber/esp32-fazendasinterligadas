@@ -1,0 +1,37 @@
+//---------------------------------------------------------------------
+//  Program:      clap switch
+//
+//  Description:  Switches on an Relay when hands are clapped.
+//                Electret microphone connected to GPIO12, relay connected to GPIO13
+//
+//  Date:         12 Outubro 2018      Author: SantoCyber
+//                http://mirako.org
+//---------------------------------------------------------------------
+#define ANALOG_PIN_0 12
+  
+void setup() {
+  Serial.begin(9600);             // using serial port to check analog value
+  pinMode(13, OUTPUT);             // LED on digital pin 2
+}
+
+void loop() {
+  int analog_val;                 // analog value read from A2
+  static bool led_state = false;  // current state of LED
+  
+  analog_val = analogRead(ANALOG_PIN_0);
+
+  if (analog_val > 10) {          // trigger threshold
+    // toggle LED
+    if (led_state) {
+      led_state = false;          // LED was on, now off
+      digitalWrite(13, LOW);
+      Serial.println(analog_val); // print analog value for debug purposes
+    }
+    else {
+      led_state = true;
+      digitalWrite(13, HIGH);      // LED was off, now on
+      Serial.println(analog_val);
+    }
+    delay(50);  // wait for clap noise to subside
+  }
+}
