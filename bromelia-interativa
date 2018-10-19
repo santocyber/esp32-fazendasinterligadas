@@ -1,8 +1,9 @@
-se se aproximar inciia o codigo recebendo a distancia do sensor ultra som pouco proximo apito espacosamente, 
-se aproximando o apito comeca a disparar mais rapido
-se aproximar mais o paito para e aparece uma mensagem na tela
-Hello World
-Se a pessoa gritar aparece o qrcode na tela para a proxima etapa
-se errar aparece Game Over
-Apito irritante e sliencio por 5 min
-e comeca o script novamente
+//se se aproximar inciia o codigo recebendo a distancia do sensor ultra som pouco proximo apito espacosamente, 
+//se aproximando o apito comeca a disparar mais rapido
+//se aproximar mais o paito para e aparece uma mensagem na tela
+//Hello World
+//Se a pessoa gritar aparece o qrcode na tela para a proxima etapa
+//se errar aparece Game Over
+//Apito irritante e sliencio por 5 min
+//e comeca o script novamente
+
