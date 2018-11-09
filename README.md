@@ -10,8 +10,9 @@ Installation instructions for Debian / Ubuntu OS
 - Open Terminal and execute the following command (copy->paste and hit enter):
 
   ```bash
+  sudo apt-get install git 
+  
   sudo usermod -a -G dialout $USER && \
-  sudo apt-get install git && \
   wget https://bootstrap.pypa.io/get-pip.py && \
   sudo python get-pip.py && \
   sudo pip install pyserial && \
