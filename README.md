@@ -1,10 +1,9 @@
 # esp32storming
 Instalando ESP32 
 ==================
--
 
 Installation instructions for Debian / Ubuntu OS
-=================================================
+--------------------------------
 
 - Install latest Arduino IDE from [arduino.cc](https://www.arduino.cc/en/Main/Software)
 - Open Terminal and execute the following command (copy->paste and hit enter):
