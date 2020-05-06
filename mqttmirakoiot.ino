@@ -3,16 +3,21 @@
  
 #include <WiFi.h>
 #include <PubSubClient.h> // Importa a Biblioteca PubSubClient
+#include <DHT.h>
+
+#define DHTPIN 15
+#define DHTTYPE DHT11
+
  
 //defines:
 //defines de id mqtt e tópicos para publicação e subscribe
-#define TOPICO_SUBSCRIBE "MQTTFilipeFlopEnvia"     //tópico MQTT de escuta
-#define TOPICO_PUBLISH   "MQTTFilipeFlopRecebe"    //tópico MQTT de envio de informações para Broker
+#define TOPICO_SUBSCRIBE "MQTTMirakoEnvia"     //tópico MQTT de escuta
+#define TOPICO_PUBLISH   "MQTTMirakoRecebe"    //tópico MQTT de envio de informações para Broker
                                                    //IMPORTANTE: recomendamos fortemente alterar os nomes
                                                    //            desses tópicos. Caso contrário, há grandes
                                                    //            chances de você controlar e monitorar o NodeMCU
                                                    //            de outra pessoa.
-#define ID_MQTT  "HomeAut"     //id mqtt (para identificação de sessão)
+#define ID_MQTT  "Maravilha01"     //id mqtt (para identificação de sessão)
                                //IMPORTANTE: este deve ser único no broker (ou seja, 
                                //            se um client MQTT tentar entrar com o mesmo 
                                //            id de outro já conectado ao broker, o broker 
@@ -31,16 +36,26 @@
 #define D8    15
 #define D9    3
 #define D10   1
- 
+
+DHT dht(DHTPIN, DHTTYPE);
+
+  float h = dht.readHumidity();
+  // Read temperature as Celsius (the default)
+  float t = dht.readTemperature();
+  // Read temperature as Fahrenheit (isFahrenheit = true)
+  float f = dht.readTemperature(true);
+
  
 // WIFI
-const char* SSID = "InternetSA"; // SSID / nome da rede WI-FI que deseja se conectar
-const char* PASSWORD = "semsenha"; // Senha da rede WI-FI que deseja se conectar
+const char* SSID = "InternetSA_tube"; // SSID / nome da rede WI-FI que deseja se conectar
+const char* PASSWORD = "cadebabaca"; // Senha da rede WI-FI que deseja se conectar
   
 // MQTT
-const char* BROKER_MQTT = "iot.eclipse.org"; //URL do broker MQTT que se deseja utilizar
+const char* BROKER_MQTT = "iot.mirako.org"; //URL do broker MQTT que se deseja utilizar
 int BROKER_PORT = 1883; // Porta do Broker MQTT
- 
+const char* mqttUser = "mqtt";
+const char* mqttPassword = "mqtt";
+
  
 //Variáveis e objetos globais
 WiFiClient espClient; // Cria o objeto espClient
@@ -66,6 +81,7 @@ void setup()
     initSerial();
     initWiFi();
     initMQTT();
+
 }
   
 //Função: inicializa comunicação serial com baudrate 115200 (para fins de monitorar no terminal serial 
@@ -117,23 +133,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
        msg += c;
     }
    
-    //toma ação dependendo da string recebida:
-    //verifica se deve colocar nivel alto de tensão na saída D0:
-    //IMPORTANTE: o Led já contido na placa é acionado com lógica invertida (ou seja,
-    //enviar HIGH para o output faz o Led apagar / enviar LOW faz o Led acender)
-    if (msg.equals("L"))
-    {
-        digitalWrite(D0, LOW);
-        EstadoSaida = '1';
-    }
- 
-    //verifica se deve colocar nivel alto de tensão na saída D0:
-    if (msg.equals("D"))
-    {
-        digitalWrite(D0, HIGH);
-        EstadoSaida = '0';
-    }
-     
+    
 }
   
 //Função: reconecta-se ao broker MQTT (caso ainda não esteja conectado ou em caso de a conexão cair)
@@ -154,8 +154,8 @@ void reconnectMQTT()
         else
         {
             Serial.println("Falha ao reconectar no broker.");
-            Serial.println("Havera nova tentatica de conexao em 2s");
-            delay(2000);
+            Serial.println("Havera nova tentatica de conexao em 5s");
+            delay(5000);
         }
     }
 }
@@ -201,16 +201,18 @@ void VerificaConexoesWiFIEMQTT(void)
 //Função: envia ao Broker o estado atual do output 
 //Parâmetros: nenhum
 //Retorno: nenhum
+
+
 void EnviaEstadoOutputMQTT(void)
 {
     if (EstadoSaida == '0')
-      MQTT.publish(TOPICO_PUBLISH, "D");
+      MQTT.publish(TOPICO_PUBLISH, "Humidade",h);
  
-    if (EstadoSaida == '1')
-      MQTT.publish(TOPICO_PUBLISH, "L");
+    if (EstadoSaida == '0')
+      MQTT.publish(TOPICO_PUBLISH, "Temperatura",t);
  
-    Serial.println("- Estado da saida D0 enviado ao broker!");
-    delay(1000);
+    Serial.println("- Estado da saida enviado ao broker!");
+    delay(5000);
 }
  
 //Função: inicializa o output em nível lógico baixo
@@ -236,4 +238,34 @@ void loop()
  
     //keep-alive da comunicação com broker MQTT
     MQTT.loop();
+
+
+      // Wait a few seconds between measurements.
+  delay(2000);
+
+  // Reading temperature or humidity takes about 250 milliseconds!
+  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+  float h = dht.readHumidity();
+  // Read temperature as Celsius (the default)
+  float t = dht.readTemperature();
+  // Read temperature as Fahrenheit (isFahrenheit = true)
+  float f = dht.readTemperature(true);
+
+  // Check if any reads failed and exit early (to try again).
+  if (isnan(h) || isnan(t) || isnan(f)) {
+    Serial.println(F("Failed to read from DHT sensor!"));
+    return;
+  }
+
+  // Compute heat index in Fahrenheit (the default)
+  float hif = dht.computeHeatIndex(f, h);
+  // Compute heat index in Celsius (isFahreheit = false)
+  float hic = dht.computeHeatIndex(t, h, false);
+    Serial.print(F("Humidity: "));
+  Serial.print(h);
+  Serial.print(F("%  Temperature: "));
+  Serial.print(t);
+  Serial.print(F("°C "));
+
+
 }
