@@ -1,5 +1,5 @@
 //Programa: NodeMCU e MQTT - Controle e Monitoramento IoT
-//Autor: Pedro Bertoleti
+//Autor: Hugo AB SantoCyber
 
 #include <SPI.h>
 #include <Wire.h> 
@@ -297,22 +297,12 @@ delayMicroseconds(5);
       MQTT.publish("Nivel", msg);      // publish to MQTT server
     }
 
-
-long duration;
-int distance;
-  duration = pulseIn(echopin,HIGH);
-  distance = duration *0.034/2;
-
-
-   MQTT.publish("Distancia", String(distance).c_str(), true);
-   Serial.print(String(distance));
-
-
 //Sensor LUZ
 
- int volsound;
-  volsound=analogRead(13);
-  Serial.println("Som");
+ //int volsound;
+ float volsound = analogRead(13);
+
+  Serial.println("Luz");
   Serial.println(volsound,DEC);
   MQTT.publish("LUZ", String(volsound).c_str(), true);
 
