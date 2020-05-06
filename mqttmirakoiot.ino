@@ -1,22 +1,24 @@
 //Programa: NodeMCU e MQTT - Controle e Monitoramento IoT
 //Autor: Pedro Bertoleti
- 
+
+#include <SPI.h>
+#include <Wire.h> 
 #include <WiFi.h>
 #include <PubSubClient.h> // Importa a Biblioteca PubSubClient
 #include <DHT.h>
 
 #define DHTPIN 15
 #define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
 
  
 //defines:
 //defines de id mqtt e tópicos para publicação e subscribe
 #define TOPICO_SUBSCRIBE "MQTTMirakoEnvia"     //tópico MQTT de escuta
 #define TOPICO_PUBLISH   "MQTTMirakoRecebe"    //tópico MQTT de envio de informações para Broker
-                                                   //IMPORTANTE: recomendamos fortemente alterar os nomes
-                                                   //            desses tópicos. Caso contrário, há grandes
-                                                   //            chances de você controlar e monitorar o NodeMCU
-                                                   //            de outra pessoa.
+#define humidity_topic "sensor/humidity"
+#define temperature_celsius_topic "sensor/temperature_celsius"
+#define topicpub "MirakoEnvia"
 #define ID_MQTT  "Maravilha01"     //id mqtt (para identificação de sessão)
                                //IMPORTANTE: este deve ser único no broker (ou seja, 
                                //            se um client MQTT tentar entrar com o mesmo 
@@ -37,13 +39,16 @@
 #define D9    3
 #define D10   1
 
-DHT dht(DHTPIN, DHTTYPE);
 
-  float h = dht.readHumidity();
-  // Read temperature as Celsius (the default)
-  float t = dht.readTemperature();
-  // Read temperature as Fahrenheit (isFahrenheit = true)
-  float f = dht.readTemperature(true);
+//Ultrasound sensor SNS-US020
+unsigned int EchoPin = D2;           // connect Pin 2(Arduino digital io) to Echo at US-015
+unsigned int TrigPin = D3;           // connect Pin 3(Arduino digital io) to Trig at US-015
+unsigned long Time_Echo_us = 0;
+int len_cm  = 0;
+long lastMsg = 0;
+char msg[50];
+int value = 0;
+
 
  
 // WIFI
@@ -53,8 +58,8 @@ const char* PASSWORD = "cadebabaca"; // Senha da rede WI-FI que deseja se conect
 // MQTT
 const char* BROKER_MQTT = "iot.mirako.org"; //URL do broker MQTT que se deseja utilizar
 int BROKER_PORT = 1883; // Porta do Broker MQTT
-const char* mqttUser = "mqtt";
-const char* mqttPassword = "mqtt";
+#define mqtt_user "mqtt"
+#define mqtt_password "mqtt"
 
  
 //Variáveis e objetos globais
@@ -74,6 +79,29 @@ void InitOutput(void);
 /* 
  *  Implementações das funções
  */
+
+
+
+/*void onMqttSubscribe(uint16_t packetId, uint8_t qos) {
+  Serial.println("Subscribe acknowledged.");
+  Serial.print("  packetId: ");
+  Serial.println(packetId);
+  Serial.print("  qos: ");
+  Serial.println(qos);
+}
+void onMqttUnsubscribe(uint16_t packetId) {
+  Serial.println("Unsubscribe acknowledged.");
+  Serial.print("  packetId: ");
+  Serial.println(packetId);
+}*/
+
+void onMqttPublish(uint16_t packetId) {
+  Serial.print("Publish acknowledged.");
+  Serial.print("  packetId: ");
+  Serial.println(packetId);
+}
+
+ 
 void setup() 
 {
     //inicializações:
@@ -154,7 +182,7 @@ void reconnectMQTT()
         else
         {
             Serial.println("Falha ao reconectar no broker.");
-            Serial.println("Havera nova tentatica de conexao em 5s");
+            Serial.println("Havera nova tentativa de conexao em 5s");
             delay(5000);
         }
     }
@@ -205,14 +233,7 @@ void VerificaConexoesWiFIEMQTT(void)
 
 void EnviaEstadoOutputMQTT(void)
 {
-    if (EstadoSaida == '0')
-      MQTT.publish(TOPICO_PUBLISH, "Humidade",h);
- 
-    if (EstadoSaida == '0')
-      MQTT.publish(TOPICO_PUBLISH, "Temperatura",t);
- 
-    Serial.println("- Estado da saida enviado ao broker!");
-    delay(5000);
+
 }
  
 //Função: inicializa o output em nível lógico baixo
@@ -220,10 +241,7 @@ void EnviaEstadoOutputMQTT(void)
 //Retorno: nenhum
 void InitOutput(void)
 {
-    //IMPORTANTE: o Led já contido na placa é acionado com lógica invertida (ou seja,
-    //enviar HIGH para o output faz o Led apagar / enviar LOW faz o Led acender)
-    pinMode(D0, OUTPUT);
-    digitalWrite(D0, HIGH);          
+  
 }
  
  
@@ -242,30 +260,60 @@ void loop()
 
       // Wait a few seconds between measurements.
   delay(2000);
+      // Reading temperature or humidity takes about 250 milliseconds!
+      // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+      float h = dht.readHumidity();
+      // Read temperature as Celsius (the default)
+      float t = dht.readTemperature();
 
-  // Reading temperature or humidity takes about 250 milliseconds!
-  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  float h = dht.readHumidity();
-  // Read temperature as Celsius (the default)
-  float t = dht.readTemperature();
-  // Read temperature as Fahrenheit (isFahrenheit = true)
-  float f = dht.readTemperature(true);
+   MQTT.publish(temperature_celsius_topic, String(t).c_str(), true);
+   MQTT.publish(humidity_topic, String(h).c_str(), true);
+    Serial.print(String(h));
+    Serial.print(String(t));
 
-  // Check if any reads failed and exit early (to try again).
-  if (isnan(h) || isnan(t) || isnan(f)) {
-    Serial.println(F("Failed to read from DHT sensor!"));
-    return;
-  }
 
-  // Compute heat index in Fahrenheit (the default)
-  float hif = dht.computeHeatIndex(f, h);
-  // Compute heat index in Celsius (isFahreheit = false)
-  float hic = dht.computeHeatIndex(t, h, false);
-    Serial.print(F("Humidity: "));
-  Serial.print(h);
-  Serial.print(F("%  Temperature: "));
-  Serial.print(t);
-  Serial.print(F("°C "));
+//Sensor Distancia
+const int trigpin = 27;
+const int echopin = 26;
+pinMode(trigpin, OUTPUT);
+pinMode(echopin, INPUT);
+digitalWrite(trigpin,LOW);
+delayMicroseconds(2);
+digitalWrite(trigpin, HIGH);
+delayMicroseconds(5);
+ // Read US sensor data
+    digitalWrite(trigpin, HIGH);              //begin to send a high pulse, then US-015 begin to measure the distance
+    delayMicroseconds(50);                    //set this high pulse width as 50us (>10us)
+    digitalWrite(trigpin, LOW);               //end this high pulse
+    
+    Time_Echo_us = pulseIn(echopin, HIGH);               //calculate the pulse width at EchoPin, 
+    if((Time_Echo_us < 60000) && (Time_Echo_us > 1))     //a valid pulse width should be between (1, 60000).
+    {
+      len_cm = (Time_Echo_us*34/100)/20;      //calculate the distance by pulse width, Len_mm = (Time_Echo_us * 0.34mm/us) / 20 (cm)
+      Serial.print("Present Distance is: ");  //output result to Serial monitor
+      Serial.print(len_cm, DEC);            //output result to Serial monitor
+      Serial.println("cm");                 //output result to Serial monitor
+      snprintf (msg, 50, "%ld", len_cm);
+      MQTT.publish("Nivel", msg);      // publish to MQTT server
+    }
 
+
+long duration;
+int distance;
+  duration = pulseIn(echopin,HIGH);
+  distance = duration *0.034/2;
+
+
+   MQTT.publish("Distancia", String(distance).c_str(), true);
+   Serial.print(String(distance));
+
+
+//Sensor LUZ
+
+ int volsound;
+  volsound=analogRead(13);
+  Serial.println("Som");
+  Serial.println(volsound,DEC);
+  MQTT.publish("LUZ", String(volsound).c_str(), true);
 
 }
