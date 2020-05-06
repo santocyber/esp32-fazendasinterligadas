@@ -1,5 +1,5 @@
 //Programa: NodeMCU e MQTT - Controle e Monitoramento IoT
-//Autor: Hugo AB SantoCyber
+//Autor: Hugo AB SantoCyber x.mirako.org
 
 #include <SPI.h>
 #include <Wire.h> 
@@ -14,12 +14,15 @@ DHT dht(DHTPIN, DHTTYPE);
  
 //defines:
 //defines de id mqtt e tópicos para publicação e subscribe
-#define TOPICO_SUBSCRIBE "MQTTMirakoEnvia"     //tópico MQTT de escuta
-#define TOPICO_PUBLISH   "MQTTMirakoRecebe"    //tópico MQTT de envio de informações para Broker
-#define humidity_topic "sensor/humidity"
-#define temperature_celsius_topic "sensor/temperature_celsius"
-#define topicpub "MirakoEnvia"
-#define ID_MQTT  "Maravilha01"     //id mqtt (para identificação de sessão)
+#define TOPICO_SUBSCRIBE "MaravilhaMirako"     //tópico MQTT de escuta
+#define TOPICO_PUBLISH   "MaravilhaMirako"    //tópico MQTT de envio de informações para Broker
+#define humidity_topic "Maravilha/humidity"
+#define temperature_celsius_topic "Maravilha/temperatura_celsius"
+#define topicpub "MaravilhaMirakoEnvia"
+#define ID_MQTT  "Maravilha01"    
+
+
+//id mqtt (para identificação de sessão)
                                //IMPORTANTE: este deve ser único no broker (ou seja, 
                                //            se um client MQTT tentar entrar com o mesmo 
                                //            id de outro já conectado ao broker, o broker 
@@ -266,8 +269,8 @@ void loop()
       // Read temperature as Celsius (the default)
       float t = dht.readTemperature();
 
-   MQTT.publish(temperature_celsius_topic, String(t).c_str(), true);
-   MQTT.publish(humidity_topic, String(h).c_str(), true);
+   MQTT.publish("Temperatura", String(t).c_str(), true);
+   MQTT.publish("Humidade", String(h).c_str(), true);
     Serial.print(String(h));
     Serial.print(String(t));
 
@@ -305,5 +308,23 @@ delayMicroseconds(5);
   Serial.println("Luz");
   Serial.println(volsound,DEC);
   MQTT.publish("LUZ", String(volsound).c_str(), true);
+
+//Sensor PH
+
+ //int pharray;
+ float pharray = analogRead(14);
+
+  Serial.println("PH");
+  Serial.println(volsound,DEC);
+  MQTT.publish("PH", String(volsound).c_str(), true);
+
+//Sensor TDS
+
+ //int tdsarray;
+ float tdsarray = analogRead(15);
+
+  Serial.println("TDSPPM");
+  Serial.println(volsound,DEC);
+  MQTT.publish("TDSPPM", String(volsound).c_str(), true);
 
 }
