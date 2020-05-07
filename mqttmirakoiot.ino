@@ -14,12 +14,14 @@ DHT dht(DHTPIN, DHTTYPE);
  
 //defines:
 //defines de id mqtt e tópicos para publicação e subscribe
-#define TOPICO_SUBSCRIBE "MaravilhaMirako"     //tópico MQTT de escuta
-#define TOPICO_PUBLISH   "MaravilhaMirako"    //tópico MQTT de envio de informações para Broker
-#define humidity_topic "Maravilha/humidity"
-#define temperature_celsius_topic "Maravilha/temperatura_celsius"
-#define topicpub "MaravilhaMirakoEnvia"
-#define ID_MQTT  "Maravilha01"    
+#define PUBLISHtemperatura "MaravilhaMirakoTemperatura"     
+#define PUBLISHhumidade     "MaravilhaMirakoHumidade"    
+#define PUBLISHnivel       "MaravilhaMirakoNivel"
+#define PUBLISHluz         "MaravilhaMirakoLuz"
+#define PUBLISHph          "MaravilhaMirakopH"
+#define PUBLISHppm         "MaravilhaMirakoTDS"
+#define ID_MQTT            "Maravilha01"   
+#define TOPICO_SUBSCRIBE   "MaravilhaMirako"
 
 
 //id mqtt (para identificação de sessão)
@@ -269,8 +271,8 @@ void loop()
       // Read temperature as Celsius (the default)
       float t = dht.readTemperature();
 
-   MQTT.publish("Temperatura", String(t).c_str(), true);
-   MQTT.publish("Humidade", String(h).c_str(), true);
+   MQTT.publish(PUBLISHtemperatura, String(t).c_str(), true);
+   MQTT.publish(PUBLISHhumidade, String(h).c_str(), true);
     Serial.print(String(h));
     Serial.print(String(t));
 
@@ -297,7 +299,7 @@ delayMicroseconds(5);
       Serial.print(len_cm, DEC);            //output result to Serial monitor
       Serial.println("cm");                 //output result to Serial monitor
       snprintf (msg, 50, "%ld", len_cm);
-      MQTT.publish("Nivel", msg);      // publish to MQTT server
+      MQTT.publish(PUBLISHnivel, msg);      // publish to MQTT server
     }
 
 //Sensor LUZ
@@ -307,7 +309,7 @@ delayMicroseconds(5);
 
   Serial.println("Luz");
   Serial.println(volsound,DEC);
-  MQTT.publish("LUZ", String(volsound).c_str(), true);
+  MQTT.publish(PUBLISHluz, String(volsound).c_str(), true);
 
 //Sensor PH
 
@@ -316,7 +318,7 @@ delayMicroseconds(5);
 
   Serial.println("PH");
   Serial.println(volsound,DEC);
-  MQTT.publish("PH", String(volsound).c_str(), true);
+  MQTT.publish(PUBLISHph, String(volsound).c_str(), true);
 
 //Sensor TDS
 
@@ -325,6 +327,6 @@ delayMicroseconds(5);
 
   Serial.println("TDSPPM");
   Serial.println(volsound,DEC);
-  MQTT.publish("TDSPPM", String(volsound).c_str(), true);
+  MQTT.publish(PUBLISHppm, String(volsound).c_str(), true);
 
 }
