@@ -1,17 +1,13 @@
 //Programa: NodeMCU e MQTT - Controle e Monitoramento IoT
 //Autor: Hugo AB SantoCyber x.mirako.org
-
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 #include <SPI.h>
 #include <Wire.h> 
 #include <WiFi.h>
 #include <PubSubClient.h> // Importa a Biblioteca PubSubClient
 #include <DHT.h>
 
-#define DHTPIN 15
-#define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
-
- 
 //defines:
 //defines de id mqtt e tópicos para publicação e subscribe
 #define PUBLISHtemperatura "MaravilhaMirakoTemperatura"     
@@ -22,27 +18,28 @@ DHT dht(DHTPIN, DHTTYPE);
 #define PUBLISHppm         "MaravilhaMirakoTDS"
 #define ID_MQTT            "Maravilha01"   
 #define TOPICO_SUBSCRIBE   "MaravilhaMirako"
+#define DHTPIN 15
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE); 
 
 
-//id mqtt (para identificação de sessão)
-                               //IMPORTANTE: este deve ser único no broker (ou seja, 
-                               //            se um client MQTT tentar entrar com o mesmo 
-                               //            id de outro já conectado ao broker, o broker 
-                               //            irá fechar a conexão de um deles).
-                                
- 
 //defines - mapeamento de pinos do NodeMCU
-#define D0    16
+#define D0    12
 #define D1    5
 #define D2    4
 #define D3    0
 #define D4    2
 #define D5    14
-#define D6    12
+#define D6    19
 #define D7    13
 #define D8    15
 #define D9    3
 #define D10   1
+
+//DATA
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "b.ntp.br", -3*3600, 60000);
 
 
 //Ultrasound sensor SNS-US020
@@ -53,7 +50,6 @@ int len_cm  = 0;
 long lastMsg = 0;
 char msg[50];
 int value = 0;
-
 
  
 // WIFI
@@ -80,43 +76,21 @@ void reconectWiFi();
 void mqtt_callback(char* topic, byte* payload, unsigned int length);
 void VerificaConexoesWiFIEMQTT(void);
 void InitOutput(void);
- 
-/* 
- *  Implementações das funções
- */
-
-
-
-/*void onMqttSubscribe(uint16_t packetId, uint8_t qos) {
-  Serial.println("Subscribe acknowledged.");
-  Serial.print("  packetId: ");
-  Serial.println(packetId);
-  Serial.print("  qos: ");
-  Serial.println(qos);
-}
-void onMqttUnsubscribe(uint16_t packetId) {
-  Serial.println("Unsubscribe acknowledged.");
-  Serial.print("  packetId: ");
-  Serial.println(packetId);
-}*/
-
-void onMqttPublish(uint16_t packetId) {
-  Serial.print("Publish acknowledged.");
-  Serial.print("  packetId: ");
-  Serial.println(packetId);
-}
 
  
 void setup() 
 {
     //inicializações:
-    InitOutput();
+//    InitOutput();
     initSerial();
     initWiFi();
     initMQTT();
+    timeClient.begin();
 
 }
-  
+
+
+
 //Função: inicializa comunicação serial com baudrate 115200 (para fins de monitorar no terminal serial 
 //        o que está acontecendo.
 //Parâmetros: nenhum
@@ -231,24 +205,7 @@ void VerificaConexoesWiFIEMQTT(void)
      reconectWiFi(); //se não há conexão com o WiFI, a conexão é refeita
 }
  
-//Função: envia ao Broker o estado atual do output 
-//Parâmetros: nenhum
-//Retorno: nenhum
 
-
-void EnviaEstadoOutputMQTT(void)
-{
-
-}
- 
-//Função: inicializa o output em nível lógico baixo
-//Parâmetros: nenhum
-//Retorno: nenhum
-void InitOutput(void)
-{
-  
-}
- 
  
 //programa principal
 void loop() 
@@ -257,24 +214,40 @@ void loop()
     VerificaConexoesWiFIEMQTT();
  
     //envia o status de todos os outputs para o Broker no protocolo esperado
-    EnviaEstadoOutputMQTT();
+ //   EnviaEstadoOutputMQTT();
  
     //keep-alive da comunicação com broker MQTT
     MQTT.loop();
 
 
+//Printa data e hr
+timeClient.update();
+timeClient.forceUpdate();
+struct tm *ptm = gmtime ((time_t *)timeClient.getEpochTime());
+int currentYear = ptm->tm_year+1900;
+int monthDay = ptm->tm_mday;
+int currentMonth = ptm->tm_mon+1;
+
+String comsg = String(monthDay) + "-" + String(currentMonth) + "-" + String(currentYear);
+String comsg2 = timeClient.getFormattedTime();
+
+  MQTT.publish((char*) comsg.c_str(),(char*) comsg2.c_str());
+  Serial.println(timeClient.getFormattedTime());
+    Serial.println(timeClient.getEpochTime());
+
+
       // Wait a few seconds between measurements.
-  delay(2000);
+  delay(4000);
       // Reading temperature or humidity takes about 250 milliseconds!
       // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-      float h = dht.readHumidity();
+   float h = dht.readHumidity();
       // Read temperature as Celsius (the default)
-      float t = dht.readTemperature();
-
-   MQTT.publish(PUBLISHtemperatura, String(t).c_str(), true);
-   MQTT.publish(PUBLISHhumidade, String(h).c_str(), true);
-    Serial.print(String(h));
-    Serial.print(String(t));
+   float t = dht.readTemperature();
+   
+   MQTT.publish(PUBLISHtemperatura,String(t).c_str(), true);
+   MQTT.publish(PUBLISHhumidade,String(h*0.1).c_str(), true);
+    Serial.print(h);
+    Serial.print(t);
 
 
 //Sensor Distancia
@@ -303,30 +276,23 @@ delayMicroseconds(5);
     }
 
 //Sensor LUZ
-
- //int volsound;
- float volsound = analogRead(13);
+float echo = analogRead(D0);
+//snprintf (echo, 50, "%ld", analogRead(D0));
 
   Serial.println("Luz");
-  Serial.println(volsound,DEC);
-  MQTT.publish(PUBLISHluz, String(volsound).c_str(), true);
+  Serial.println(echo);
+  MQTT.publish(PUBLISHluz, String(echo).c_str(), true);
 
 //Sensor PH
-
- //int pharray;
- float pharray = analogRead(14);
-
+float echo2 = analogRead(D1);
   Serial.println("PH");
-  Serial.println(volsound,DEC);
-  MQTT.publish(PUBLISHph, String(volsound).c_str(), true);
+  Serial.println(echo2);
+  MQTT.publish(PUBLISHph,String(echo2).c_str(), true);
 
 //Sensor TDS
-
- //int tdsarray;
- float tdsarray = analogRead(15);
-
+float echo3 = analogRead(D2);
   Serial.println("TDSPPM");
-  Serial.println(volsound,DEC);
-  MQTT.publish(PUBLISHppm, String(volsound).c_str(), true);
-
+  Serial.println(echo3);
+  MQTT.publish(PUBLISHppm,String(echo3).c_str(), true);
+delay(10000);
 }
