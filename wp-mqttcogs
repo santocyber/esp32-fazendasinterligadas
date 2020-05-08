@@ -1,0 +1,35 @@
+<!-- wp:columns -->
+<div class="wp-block-columns"><!-- wp:column -->
+<div class="wp-block-column"><!-- wp:html -->
+Temperatura:<br>[mqttcogs_drawgoogle options="{height:200}" charttype="Gauge" ajax="true"]
+[mqttcogs_data limit="1" topics="MaravilhaMirako/Temperatura"]
+[/mqttcogs_drawgoogle]
+
+<!-- /wp:html -->
+
+<!-- wp:html -->
+pH:<br>[mqttcogs_drawgoogle options="{height:200}" charttype="Gauge" ajax="true"]
+[mqttcogs_data limit="1" topics="MaravilhaMirako/pH"]
+[/mqttcogs_drawgoogle]
+
+<!-- /wp:html --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:html -->
+Humidade:<br>[mqttcogs_drawgoogle options="{height:200}" charttype="Gauge" ajax="true"]
+[mqttcogs_data limit="1" topics="MaravilhaMirako/Humidade"]
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+<!-- wp:html -->
+TDS:<br>[mqttcogs_drawgoogle options="{height:200}" charttype="Gauge" ajax="true"]
+[mqttcogs_data limit="1" topics="MaravilhaMirako/TDS"]
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p></p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns -->
