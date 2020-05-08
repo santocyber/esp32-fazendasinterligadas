@@ -12,8 +12,8 @@
 //defines de id mqtt e tópicos para publicação e subscribe
 #define PUBLISHtemperatura "MaravilhaMirako/Temperatura"     
 #define PUBLISHhumidade    "MaravilhaMirako/Humidade"    
-#define PUBLISHnivel       "MaravilhaMirako/Nivel"
-#define PUBLISHluz         "MaravilhaMirako/Luz"
+#define PUBLISHnivel       "MaravilhaMirako/Nivelreservatorio"
+#define PUBLISHluz         "MaravilhaMirako/Nivelluz"
 #define PUBLISHph          "MaravilhaMirako/pH"
 #define PUBLISHppm         "MaravilhaMirako/TDS"
 #define ID_MQTT            "Maravilha01"   
@@ -25,8 +25,8 @@ DHT dht(DHTPIN, DHTTYPE);
 //defines - mapeamento de pinos do NodeMCU
 #define D0    13
 #define D1    22
-#define D2    4
-#define D3    0
+#define D2    27
+#define D3    23
 #define D4    2
 #define D5    14
 #define D6    19
@@ -51,8 +51,8 @@ int value = 0;
 
  
 // WIFI
-const char* SSID = "InternetSA_tube"; // SSID / nome da rede WI-FI que deseja se conectar
-const char* PASSWORD = "cadebabaca"; // Senha da rede WI-FI que deseja se conectar
+const char* SSID = "InternetSA_plus"; // SSID / nome da rede WI-FI que deseja se conectar
+const char* PASSWORD = "semsenha"; // Senha da rede WI-FI que deseja se conectar
   
 // MQTT
 const char* BROKER_MQTT = "iot.mirako.org"; //URL do broker MQTT que se deseja utilizar
