@@ -10,22 +10,21 @@
 
 //defines:
 //defines de id mqtt e tópicos para publicação e subscribe
-#define PUBLISHtemperatura "MaravilhaMirakoTemperatura"     
-#define PUBLISHhumidade     "MaravilhaMirakoHumidade"    
-#define PUBLISHnivel       "MaravilhaMirakoNivel"
-#define PUBLISHluz         "MaravilhaMirakoLuz"
-#define PUBLISHph          "MaravilhaMirakopH"
-#define PUBLISHppm         "MaravilhaMirakoTDS"
+#define PUBLISHtemperatura "MaravilhaMirako/Temperatura"     
+#define PUBLISHhumidade    "MaravilhaMirako/Humidade"    
+#define PUBLISHnivel       "MaravilhaMirako/Nivel"
+#define PUBLISHluz         "MaravilhaMirako/Luz"
+#define PUBLISHph          "MaravilhaMirako/pH"
+#define PUBLISHppm         "MaravilhaMirako/TDS"
 #define ID_MQTT            "Maravilha01"   
 #define TOPICO_SUBSCRIBE   "MaravilhaMirako"
 #define DHTPIN 15
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE); 
 
-
 //defines - mapeamento de pinos do NodeMCU
-#define D0    12
-#define D1    5
+#define D0    13
+#define D1    22
 #define D2    4
 #define D3    0
 #define D4    2
@@ -40,7 +39,6 @@ DHT dht(DHTPIN, DHTTYPE);
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "b.ntp.br", -3*3600, 60000);
-
 
 //Ultrasound sensor SNS-US020
 unsigned int EchoPin = D2;           // connect Pin 2(Arduino digital io) to Echo at US-015
@@ -76,17 +74,16 @@ void reconectWiFi();
 void mqtt_callback(char* topic, byte* payload, unsigned int length);
 void VerificaConexoesWiFIEMQTT(void);
 void InitOutput(void);
-
  
 void setup() 
 {
     //inicializações:
-//    InitOutput();
+
     initSerial();
     initWiFi();
     initMQTT();
     timeClient.begin();
-
+    dht.begin();
 }
 
 
@@ -238,14 +235,11 @@ String comsg2 = timeClient.getFormattedTime();
 
       // Wait a few seconds between measurements.
   delay(4000);
-      // Reading temperature or humidity takes about 250 milliseconds!
-      // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-   float h = dht.readHumidity();
-      // Read temperature as Celsius (the default)
-   float t = dht.readTemperature();
-   
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+
    MQTT.publish(PUBLISHtemperatura,String(t).c_str(), true);
-   MQTT.publish(PUBLISHhumidade,String(h*0.1).c_str(), true);
+   MQTT.publish(PUBLISHhumidade,String(h).c_str(), true);
     Serial.print(h);
     Serial.print(t);
 
@@ -294,5 +288,5 @@ float echo3 = analogRead(D2);
   Serial.println("TDSPPM");
   Serial.println(echo3);
   MQTT.publish(PUBLISHppm,String(echo3).c_str(), true);
-delay(10000);
+delay(5000);
 }
