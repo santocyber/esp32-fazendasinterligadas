@@ -38,9 +38,9 @@ Qrcode Sample Code
 =================================================
 
 
-Clap Switch Sample Code
+WebSite Conect
 =================================================
-
+http://iot.mirako.org
 
 Mqtt conect
 =================================================
