@@ -1,4 +1,84 @@
 <!-- wp:html -->
+[ccpw id="14"]
+<!-- /wp:html -->
+
+<!-- wp:columns -->
+<div class="wp-block-columns"><!-- wp:column -->
+<div class="wp-block-column"><!-- wp:html -->
+Temperatura:[mqttcogs_drawgoogle options="{height:200}" charttype="Gauge" ajax="true"]
+[mqttcogs_data limit="1" topics="MaravilhaMirako/Temperatura"]
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+<!-- wp:html -->
+pH:[mqttcogs_drawgoogle options="{height:200}" charttype="Gauge" ajax="true"]
+[mqttcogs_data limit="1" topics="MaravilhaMirako/ph"]
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p></p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:html -->
+Humidade:[mqttcogs_drawgoogle options="{height:200}" charttype="Gauge" ajax="true"]
+[mqttcogs_data limit="1" topics="MaravilhaMirako/humidade"]
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+<!-- wp:html -->
+TDS/ppm:[mqttcogs_drawgoogle options="{height:200}" charttype="Gauge" ajax="true"]
+[mqttcogs_data limit="1" topics="MaravilhaMirako/tds"]
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p></p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns -->
+
+<!-- wp:html -->
+[mqttcogs_drawgoogle options="{series: {0:{labelInLegend: ''}},title:'Temp',height:300,hAxis: { title: 'DateTime(UTC)',format:'d MMM HH:mm' },vAxis: { title: 'Temp (C)' }}" charttype="LineChart"] 
+[mqttcogs_data limit="100" topics="MaravilhaMirako/Temperatura"] 
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+<!-- wp:html -->
+[mqttcogs_drawgoogle options="{series: {0:{labelInLegend: ''}},title:'Humi',height:300,hAxis: { title: 'DateTime(UTC)',format:'d MMM HH:mm' },vAxis: { title: 'Humi' }}" charttype="LineChart"] 
+[mqttcogs_data limit="100" topics="MaravilhaMirako/humidade"] 
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+<!-- wp:html -->
+[mqttcogs_drawgoogle options="{series: {0:{labelInLegend: ''}},title:'pH',height:300,hAxis: { title: 'DateTime(UTC)',format:'d MMM HH:mm' },vAxis: { title: 'ph' }}" charttype="LineChart"] 
+[mqttcogs_data limit="100" topics="MaravilhaMirako/ph"] 
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+<!-- wp:html -->
+[mqttcogs_drawgoogle options="{series: {0:{labelInLegend: ''}},title:'TDS',height:300,hAxis: { title: 'DateTime(UTC)',format:'d MMM HH:mm' },vAxis: { title: 'ppm' }}" charttype="LineChart"] 
+[mqttcogs_data limit="100" topics="MaravilhaMirako/tds"] 
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+<!-- wp:html -->
+[mqttcogs_drawgoogle options="{series: {0:{labelInLegend: ''}},title:'MaravilhaMirako/Nivelreservatorio',height:300,hAxis: { title: 'DateTime(UTC)',format:'d MMM HH:mm' },vAxis: { title: 'cm' }}" charttype="LineChart"] 
+[mqttcogs_data limit="100" topics="MaravilhaMirako/Nivelreservatorio"] 
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+<!-- wp:html -->
+[mqttcogs_drawgoogle options="{series: {0:{labelInLegend: ''}},title:'MaravilhaMirako/Nivelluz',height:300,hAxis: { title: 'DateTime(UTC)',format:'d MMM HH:mm' },vAxis: { title: 'lumens' }}" charttype="LineChart"] 
+[mqttcogs_data limit="100" topics="MaravilhaMirako/Nivelluz"] 
+[/mqttcogs_drawgoogle]
+<!-- /wp:html -->
+
+
+
+<!-- wp:html -->
 [mqttcogs_drawdatatable][mqttcogs_data limit="2" topics="MaravilhaMirako/ph"] 
 [/mqttcogs_drawdatatable]
 <!-- /wp:html -->
